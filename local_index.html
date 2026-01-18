@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Sales Report - تقرير المبيعات اليومية</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #006C35;
+            --secondary: #1a4d2e;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.6);
+        }
+
+        body.dark-mode {
+            --primary: #34d399;
+            --secondary: #6ee7b7;
+            --glass-bg: rgba(17, 24, 39, 0.9);
+            --glass-border: rgba(52, 211, 153, 0.3);
+        }
+
+        body {
+            font-family: 'Tajawal', 'Noto Sans Bengali', sans-serif;
+            background: #f0fdf4;
+            min-height: 100vh;
+        }
+
+        body.dark-mode {
+            background: #0f172a;
+            color: #f3f4f6;
+        }
+
+        .app-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid var(--glass-border);
+        }
+
+        input, select {
+            background: linear-gradient(135deg, #ecfdf5, #ffffff) !important;
+            border: 2px solid rgba(16, 185, 129, 0.2) !important;
+            border-bottom: 4px solid rgba(5, 150, 105, 0.3) !important;
+            border-radius: 16px;
+            color: #064e3b;
+            font-weight: 800;
+        }
+        
+        select option {
+            background: #ffffff !important;
+            color: #064e3b !important;
+            font-weight: 700;
+            padding: 10px;
+        }
+        
+        body.dark-mode input, body.dark-mode select {
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.6), rgba(17, 24, 39, 0.8)) !important;
+            border-color: rgba(52, 211, 153, 0.3) !important;
+            color: #d1fae5 !important;
+        }
+        
+        body.dark-mode select option {
+            background: #1f2937 !important;
+            color: #d1fae5 !important;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2) !important;
+            outline: none;
+        }
+
+        .financial-input {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7) !important;
+            border-bottom-color: rgba(245, 158, 11, 0.4) !important;
+            color: #92400e;
+        }
+
+        .label-ar { color: var(--primary); font-weight: 900; font-size: 1.1rem; display: block; margin-bottom: 4px; }
+        body.dark-mode .label-ar { color: #34d399; }
+        .label-sub { font-size: 0.75rem; display: flex; justify-content: space-between; color: #6b7280; }
+        body.dark-mode .label-sub { color: #9ca3af; }
+        
+        body.dark-mode .app-card h2 { color: #fbbf24 !important; }
+        body.dark-mode .app-card .text-gray-800 { color: #fbbf24 !important; }
+        body.dark-mode .app-card span.text-2xl { filter: brightness(1.5); }
+
+        .btn-submit {
+            background: linear-gradient(45deg, #059669, #10b981, #059669);
+            background-size: 200%;
+            animation: pulse-btn 2s infinite;
+        }
+        @keyframes pulse-btn {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+            50% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes progressAnim { from { width: 0; } to { width: 100%; } }
+        .progress-animate { animation: progressAnim 1.5s ease forwards; }
+
+        @media (max-width: 640px) {
+            .app-card { padding: 1rem !important; }
+            h1 { font-size: 1.75rem !important; }
+            .text-4xl { font-size: 1.5rem !important; }
+            .text-6xl { font-size: 2rem !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <header class="relative w-full min-h-[50vh] md:min-h-[55vh] bg-emerald-900 overflow-hidden flex flex-col">
+        <div class="absolute inset-0 z-0">
+            <video class="w-full h-full object-cover" autoplay muted loop playsinline>
+                <source src="https://cms.saudiflag.sa/uploads/Untitled_video_Made_with_Clipchamp_4_720_1_674ecab38f.mp4" type="video/mp4">
+            </video>
+            <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-emerald-900/80"></div>
+        </div>
+
+        <div class="relative z-10 flex justify-between items-start p-4 md:p-6">
+            <div class="bg-black/40 backdrop-blur-md p-3 md:p-4 rounded-xl border border-white/20">
+                <div id="liveClock" class="text-2xl md:text-4xl font-bold font-mono text-yellow-400">00:00:00</div>
+                <div id="liveDate" class="text-xs md:text-sm text-white mt-1">جاري التحميل...</div>
+            </div>
+            
+            <div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Emblem_of_Saudi_Arabia.svg/256px-Emblem_of_Saudi_Arabia.svg.png" 
+                     class="h-20 md:h-28 w-auto" alt="Saudi Emblem">
+            </div>
+        </div>
+
+        <a href="local_admin.html" class="absolute top-28 md:top-32 left-4 md:left-6 z-20 p-2 md:p-3 bg-white/10 hover:bg-emerald-600 text-white rounded-full backdrop-blur-md border border-white/20 transition-all" title="Admin">
+            <svg class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+        </a>
+
+        <div class="relative z-10 mt-auto text-center pb-6 px-4">
+            <h1 class="text-3xl md:text-5xl font-black text-white drop-shadow-lg mb-2">
+                تقرير المبيعات اليومية
+            </h1>
+            <div class="flex flex-wrap justify-center items-center gap-2 md:gap-4 mb-4">
+                <span class="text-emerald-200 text-sm font-bold">Daily Sales Report</span>
+                <span class="text-white/40 hidden md:inline">|</span>
+                <span class="text-emerald-200 text-sm font-bold">দৈনিক বিক্রয় প্রতিবেদন</span>
+            </div>
+            
+            <button type="button" id="themeToggleBtn" class="bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 rounded-full px-6 py-3 inline-flex items-center gap-4 transition-all hover:scale-105 cursor-pointer">
+                <span class="text-white font-bold text-sm md:text-base">وضع العرض (Theme)</span>
+                <div class="relative w-12 h-6 rounded-full bg-slate-800 border border-white/30 p-1 flex items-center">
+                    <div id="toggleCircle" class="w-4 h-4 bg-white rounded-full shadow transition-transform duration-300 absolute right-1"></div>
+                </div>
+            </button>
+        </div>
+    </header>
+
+    <main class="w-full bg-gradient-to-b from-gray-100 to-gray-200 py-10 md:py-16 px-4">
+        <div class="max-w-4xl mx-auto">
+            
+            <form id="salesForm" class="space-y-6 md:space-y-8">
+                
+                <div class="app-card p-4 md:p-8 border-t-4 border-emerald-600">
+                    <div class="flex items-center gap-3 mb-6 border-b pb-4">
+                        <span class="text-2xl">📅</span>
+                        <h2 class="text-xl md:text-2xl font-black text-gray-800 dark:text-white">التاريخ والوقت</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                        <div>
+                            <div class="label-group"><span class="label-ar">التاريخ (ميلادي)</span><div class="label-sub"><span>Gregorian</span><span>গ্রেগরিয়ান</span></div></div>
+                            <input type="date" name="date_gregorian" id="gregorianDate" class="w-full h-14 px-4 text-lg text-center" required>
+                        </div>
+                        <div>
+                            <div class="label-group"><span class="label-ar">التاريخ (هجري)</span><div class="label-sub"><span>Hijri</span><span>হিজরি</span></div></div>
+                            <div class="grid grid-cols-3 gap-2" dir="ltr">
+                                <select name="hijri_year" id="hYear" class="h-14 text-center font-bold"></select>
+                                <select name="hijri_month" id="hMonth" class="h-14 text-center font-bold"></select>
+                                <select name="hijri_day" id="hDay" class="h-14 text-center font-bold"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card p-4 md:p-8 border-t-4 border-emerald-600">
+                    <div class="flex items-center gap-3 mb-6 border-b pb-4">
+                        <span class="text-2xl">🏢</span>
+                        <h2 class="text-xl md:text-2xl font-black text-gray-800 dark:text-white">بيانات الفرع</h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                        <div>
+                            <div class="label-group"><span class="label-ar">الفرع / الموقع</span><div class="label-sub"><span>Branch</span><span>শাখা</span></div></div>
+                            <select name="branch" class="w-full h-14 px-4 font-bold" required>
+                                <option value="" disabled selected>-- اختر الفرع --</option>
+                                <option value="Riyadh Main">الرياض - الرئيسي</option>
+                                <option value="Jeddah North">جدة - الشمال</option>
+                                <option value="Jeddah South">جدة - الجنوب</option>
+                                <option value="Dammam">الدمام</option>
+                                <option value="Mecca">مكة المكرمة</option>
+                                <option value="Medina">المدينة المنورة</option>
+                                <option value="Tabuk">تبوك</option>
+                                <option value="Hail">حائل</option>
+                                <option value="Jizan">جازان</option>
+                                <option value="Najran">نجران</option>
+                                <option value="Abha">أبها</option>
+                                <option value="Buraidah">بريدة</option>
+                                <option value="Taif">الطائف</option>
+                                <option value="Al-Wadiyin">الواديين</option>
+                                <option value="Al-Khairiyah">الخيرية</option>
+                                <option value="Al-Aqaba">العقبة</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="label-group"><span class="label-ar">إسم المؤسسة</span><div class="label-sub"><span>Organization</span><span>প্রতিষ্ঠান</span></div></div>
+                            <select name="organization" class="w-full h-14 px-4 font-bold text-sm" required>
+                                <option value="" disabled selected>-- اختر المؤسسة --</option>
+                                <option value="Asl Al-Basil 1">تموينات أصل الباسل 1</option>
+                                <option value="Asl Al-Basil 2">تموينات أصل الباسل 2</option>
+                                <option value="Darat Al-Mawasim 1">داره المواسم 1</option>
+                                <option value="Darat Al-Mawasim 2">داره المواسم 2</option>
+                                <option value="Rukn Al-Fawaris Bakery 1">مخابز ركن الفوارس 1</option>
+                                <option value="Rukn Al-Fawaris Bakery 2">مخابز ركن الفوارس 2</option>
+                                <option value="Durrat Al-Wadiyin">درة الواديين</option>
+                                <option value="Ibriz Al-Sharq">إبريز الشرق</option>
+                                <option value="Rukn Al-Fawaris Meals">ركن الفوارس للوجبات</option>
+                                <option value="Al-Wadiyin Petromin">الواديين - البترومين</option>
+                                <option value="Al-Wadiyin Bathaa">الواديين - بطحاء قريش</option>
+                                <option value="Al-Wadiyin Charity">الواديين - الخيرية</option>
+                                <option value="Al-Wadiyin Aqaba">الواديين - العقبة</option>
+                                <option value="Al-Wadiyin KKU">الواديين - جامعة الملك خالد</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card p-4 md:p-8 border-t-4 border-emerald-600">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                        <div>
+                            <div class="label-group"><span class="label-ar">المسئول</span><div class="label-sub"><span>Responsible</span><span>দায়িত্বশীল</span></div></div>
+                            <select name="responsible" class="w-full h-14 px-4 font-bold" required>
+                                <option value="" disabled selected>-- اختر --</option>
+                                <option value="Inam">إنعام | Inam | ইনাম</option>
+                                <option value="Ridwan">رضوان | Ridwan | রিদওয়ান</option>
+                                <option value="Zakaria">زكريا | Zakaria | জাকারিয়া</option>
+                                <option value="Shajan">شاجان | Shajan | শাজান</option>
+                                <option value="Mohit">موهيت | Mohit | মোহিত</option>
+                                <option value="Nayef">نايف | Nayef | নায়েফ</option>
+                                <option value="Naeem">نعيم | Naeem | নাঈম</option>
+                                <option value="Hilal">هلال | Hilal | হিলাল</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="label-group"><span class="label-ar">رقم الماكينة</span><div class="label-sub"><span>Machine No</span><span>মেশিন</span></div></div>
+                            <input type="text" name="machine_number" class="w-full h-14 px-4 font-bold font-mono text-center" placeholder="Machine #">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card p-4 md:p-8 border-t-4 border-yellow-500 bg-yellow-50/50">
+                    <div class="flex items-center gap-3 mb-6 border-b pb-4">
+                        <span class="text-2xl">💰</span>
+                        <h2 class="text-xl md:text-2xl font-black text-gray-800 dark:text-white">المعاملات المالية</h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                        <div class="relative">
+                            <div class="label-group"><span class="label-ar">كاش</span><div class="label-sub"><span>Cash</span><span>নগদ</span></div></div>
+                            <input type="number" step="0.01" name="cash" class="financial-input w-full h-16 px-4 pl-14 text-2xl md:text-3xl font-mono font-bold text-left" dir="ltr" placeholder="0.00">
+                            <span class="absolute left-4 top-12 text-yellow-700 font-bold text-sm">SAR</span>
+                        </div>
+                        <div class="relative">
+                            <div class="label-group"><span class="label-ar">نظام نقاط البيع / شبكة</span><div class="label-sub"><span>Point of Sale (POS)</span><span>পয়েন্ট অফ সেল সিস্টেম</span></div></div>
+                            <input type="number" step="0.01" name="pos" class="financial-input w-full h-16 px-4 pl-14 text-2xl md:text-3xl font-mono font-bold text-left" dir="ltr" placeholder="0.00">
+                            <span class="absolute left-4 top-12 text-yellow-700 font-bold text-sm">SAR</span>
+                        </div>
+                        <div class="relative">
+                            <div class="label-group"><span class="label-ar text-red-600">مشتريات</span><div class="label-sub"><span>Purchases</span><span>ক্রয়</span></div></div>
+                            <input type="number" step="0.01" name="purchases" class="financial-input w-full h-16 px-4 pl-14 text-2xl md:text-3xl font-mono font-bold text-left text-red-600" dir="ltr" placeholder="0.00">
+                            <span class="absolute left-4 top-12 text-red-500 font-bold text-sm">SAR</span>
+                        </div>
+                        <div class="relative">
+                            <div class="label-group"><span class="label-ar text-red-600">مسحوبات</span><div class="label-sub"><span>Withdrawals</span><span>উত্তোলন</span></div></div>
+                            <input type="number" step="0.01" name="withdrawals" class="financial-input w-full h-16 px-4 pl-14 text-2xl md:text-3xl font-mono font-bold text-left text-red-600" dir="ltr" placeholder="0.00">
+                            <span class="absolute left-4 top-12 text-red-500 font-bold text-sm">SAR</span>
+                        </div>
+                        <div class="md:col-span-2">
+                            <div class="label-group"><span class="label-ar">القائم بالسحب</span><div class="label-sub"><span>Withdrawer</span><span>উত্তোলনকারী</span></div></div>
+                            <select name="withdrawer_name" class="w-full h-14 px-4 font-bold">
+                                <option value="" disabled selected>-- اختر --</option>
+                                <option value="Dulal">دولال | Dulal | দুলাল</option>
+                                <option value="Moaz">معاذ | Moaz | মুয়াজ</option>
+                                <option value="Inam">إنعام | Inam | ইনাম</option>
+                                <option value="Ridwan">رضوان | Ridwan | রিদওয়ান</option>
+                                <option value="Zakaria">زكريا | Zakaria | জাকারিয়া</option>
+                                <option value="Shajan">شاجان | Shajan | শাজান</option>
+                                <option value="Mohit">موهيت | Mohit | মোহিত</option>
+                                <option value="Nayef">نايف | Nayef | নায়েফ</option>
+                                <option value="Naeem">نعيم | Naeem | নাঈম</option>
+                                <option value="Hilal">هلال | Hilal | হিলাল</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 bg-gray-900 rounded-2xl p-6 text-white flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div class="text-center md:text-right">
+                            <div class="text-gray-400 font-bold">صافي المبيعات اليومية</div>
+                            <div class="text-emerald-400 text-xs uppercase tracking-widest">Net Sales Total</div>
+                        </div>
+                        <div class="text-4xl md:text-5xl font-mono font-black text-emerald-400" dir="ltr" id="netTotal">0.00 SAR</div>
+                    </div>
+                </div>
+
+                <div class="app-card p-4 md:p-8 border-t-4 border-blue-500 bg-blue-50/30">
+                    <div class="flex items-center gap-3 mb-6 border-b pb-4">
+                        <span class="text-2xl">📸</span>
+                        <h2 class="text-xl md:text-2xl font-black text-gray-800 dark:text-white">صور الفواتير</h2>
+                    </div>
+
+                    <div class="relative w-full cursor-pointer group" id="uploadBox">
+                        <input type="file" name="invoices[]" id="invoiceInput" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        
+                        <div class="border-4 border-dashed border-blue-300 group-hover:border-blue-500 rounded-2xl p-8 md:p-12 text-center bg-white/70 group-hover:bg-white transition-all">
+                            <div class="bg-blue-100 w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
+                                <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-blue-900 font-black text-xl md:text-2xl">اضغط هنا لرفع الصور</h3>
+                            <p class="text-gray-500 mt-2">Click to Upload | Unlimited Images</p>
+                        </div>
+                    </div>
+
+                    <div id="progressContainer" class="hidden mt-6">
+                        <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div id="progressBar" class="bg-blue-500 h-3 rounded-full progress-animate"></div>
+                        </div>
+                        <p class="text-center text-blue-600 mt-2 font-bold text-sm">جاري التحميل...</p>
+                    </div>
+
+                    <div id="uploadStats" class="hidden mt-6 text-center">
+                        <span class="inline-block bg-emerald-100 text-emerald-800 px-6 py-3 rounded-full font-bold font-mono text-sm border border-emerald-300">
+                            <span id="fileCount">0</span> صور | <span id="fileSize">0.00</span> MB
+                        </span>
+                    </div>
+
+                    <div id="previewGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-6"></div>
+                </div>
+
+                <button type="submit" class="btn-submit w-full text-white font-black text-2xl md:text-3xl py-6 md:py-8 rounded-2xl shadow-2xl hover:scale-[1.02] transition-transform">
+                    🚀 إرسال التقرير اليومي
+                </button>
+
+            </form>
+        </div>
+    </main>
+
+    <div id="successModal" class="fixed inset-0 z-[100] hidden bg-black/90 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 md:p-12 max-w-md w-full text-center shadow-2xl">
+            <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h3 class="text-3xl font-black text-gray-800 mb-2">تم بنجاح!</h3>
+            <p class="text-emerald-600 font-bold">Report Submitted Successfully</p>
+            <div class="mt-8 space-y-4">
+                <button onclick="resetForm()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-bold text-lg">
+                    تسجيل جديد (New Record)
+                </button>
+                <p class="text-gray-400 text-sm">Auto redirect in <span id="countdown" class="text-emerald-600 font-bold">5</span>s</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Clock functionality
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('liveClock').textContent = hours + ':' + minutes + ':' + seconds;
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('liveDate').textContent = now.toLocaleDateString('ar-SA', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Theme toggle
+        const themeBtn = document.getElementById('themeToggleBtn');
+        const toggleCircle = document.getElementById('toggleCircle');
+        
+        function applyTheme(dark) {
+            if (dark) {
+                document.body.classList.add('dark-mode');
+                toggleCircle.style.right = 'auto';
+                toggleCircle.style.left = '4px';
+                toggleCircle.style.backgroundColor = '#fbbf24';
+            } else {
+                document.body.classList.remove('dark-mode');
+                toggleCircle.style.left = 'auto';
+                toggleCircle.style.right = '4px';
+                toggleCircle.style.backgroundColor = '#ffffff';
+            }
+        }
+        
+        themeBtn.addEventListener('click', function() {
+            const isDark = !document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            applyTheme(isDark);
+        });
+        
+        if (localStorage.getItem('theme') === 'dark') {
+            applyTheme(true);
+        }
+
+        // Image upload handling
+        const invoiceInput = document.getElementById('invoiceInput');
+        const progressContainer = document.getElementById('progressContainer');
+        const uploadStats = document.getElementById('uploadStats');
+        const previewGrid = document.getElementById('previewGrid');
+        
+        invoiceInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            
+            if (files.length > 0) {
+                progressContainer.classList.remove('hidden');
+                
+                let totalSize = 0;
+                files.forEach(f => totalSize += f.size);
+                
+                setTimeout(function() {
+                    progressContainer.classList.add('hidden');
+                    uploadStats.classList.remove('hidden');
+                    
+                    document.getElementById('fileCount').textContent = files.length;
+                    document.getElementById('fileSize').textContent = (totalSize / 1024 / 1024).toFixed(2);
+                    
+                    previewGrid.innerHTML = '';
+                    
+                    files.forEach(function(file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const div = document.createElement('div');
+                            div.className = 'aspect-square rounded-xl overflow-hidden shadow-lg border-2 border-white bg-gray-100';
+                            
+                            const img = document.createElement('img');
+                            img.src = event.target.result;
+                            img.className = 'w-full h-full object-cover';
+                            img.alt = file.name;
+                            
+                            div.appendChild(img);
+                            previewGrid.appendChild(div);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }, 1500);
+            }
+        });
+
+        // Hijri date initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            document.getElementById('gregorianDate').value = today.toISOString().split('T')[0];
+            
+            let hYear = 1447, hMonth = 7, hDay = 28;
+            
+            try {
+                const formatter = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', {
+                    day: 'numeric', month: 'numeric', year: 'numeric'
+                });
+                const parts = formatter.formatToParts(today);
+                
+                parts.forEach(function(p) {
+                    if (p.type === 'year') {
+                        const yr = parseInt(p.value.replace(/[^0-9]/g, ''));
+                        if (yr > 1400 && yr < 1500) hYear = yr;
+                    }
+                    if (p.type === 'month') hMonth = parseInt(p.value);
+                    if (p.type === 'day') hDay = parseInt(p.value);
+                });
+            } catch(e) { console.log('Hijri fallback'); }
+            
+            const ySelect = document.getElementById('hYear');
+            [1445, 1446, 1447, 1448].forEach(function(y) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                if (y === hYear) opt.selected = true;
+                ySelect.appendChild(opt);
+            });
+            
+            const mSelect = document.getElementById('hMonth');
+            for (let i = 1; i <= 12; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = i;
+                if (i === hMonth) opt.selected = true;
+                mSelect.appendChild(opt);
+            }
+            
+            const dSelect = document.getElementById('hDay');
+            for (let i = 1; i <= 30; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = i;
+                if (i === hDay) opt.selected = true;
+                dSelect.appendChild(opt);
+            }
+        });
+
+        // Financial calculation
+        const finInputs = document.querySelectorAll('.financial-input');
+        finInputs.forEach(function(input) {
+            input.addEventListener('input', calculateTotal);
+        });
+        
+        function calculateTotal() {
+            const cash = parseFloat(document.querySelector('[name="cash"]').value) || 0;
+            const pos = parseFloat(document.querySelector('[name="pos"]').value) || 0;
+            const purchases = parseFloat(document.querySelector('[name="purchases"]').value) || 0;
+            const withdrawals = parseFloat(document.querySelector('[name="withdrawals"]').value) || 0;
+            
+            const total = (cash + pos) - (purchases + withdrawals);
+            const display = document.getElementById('netTotal');
+            
+            display.textContent = total.toFixed(2) + ' SAR';
+            display.className = 'text-4xl md:text-5xl font-mono font-black ' + (total < 0 ? 'text-red-400' : 'text-emerald-400');
+        }
+
+        // Form submission (LOCAL STORAGE ONLY)
+        document.getElementById('salesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const record = {};
+            formData.forEach(function(value, key) { 
+                if (key !== 'invoices[]') record[key] = value; 
+            });
+            
+            record.id = Date.now();
+            record.timestamp = new Date().toISOString();
+            record.net_total = document.getElementById('netTotal').textContent;
+            
+            // Save locally only
+            const records = JSON.parse(localStorage.getItem('allSalesRecords') || '[]');
+            records.push(record);
+            localStorage.setItem('allSalesRecords', JSON.stringify(records));
+            
+            // Show success modal
+            document.getElementById('successModal').classList.remove('hidden');
+            
+            // Countdown
+            let count = 5;
+            const timer = setInterval(function() {
+                count--;
+                document.getElementById('countdown').textContent = count;
+                if (count <= 0) {
+                    clearInterval(timer);
+                    resetForm();
+                }
+            }, 1000);
+            
+            window.currentTimer = timer;
+        });
+
+        function resetForm() {
+            if (window.currentTimer) clearInterval(window.currentTimer);
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('salesForm').reset();
+            document.getElementById('netTotal').textContent = '0.00 SAR';
+            document.getElementById('netTotal').className = 'text-4xl md:text-5xl font-mono font-black text-emerald-400';
+            document.getElementById('previewGrid').innerHTML = '';
+            document.getElementById('uploadStats').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

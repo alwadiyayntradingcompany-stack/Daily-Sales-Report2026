@@ -16,3 +16,12 @@ const GOOGLE_CONFIG = {
     // Your Google Drive Folder ID (from the URL)
     DRIVE_FOLDER_ID: '1RkWqnogAYQyTD3IhdkynT8mZYJsLlbT1'
 };
+
+// Instructions:
+// 1. Go to Google Cloud Console (console.cloud.google.com)
+// 2. Create a new project or select existing one
+// 3. Enable Google Sheets API and Google Drive API
+// 4. Create credentials (API Key and OAuth 2.0 Client ID)
+// 5. Create a Google Sheet and get its ID from URL
+// 6. Create a Google Drive folder and get its ID from URL
+// 7. Replace the values above with your actual credentials
